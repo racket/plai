@@ -21,7 +21,7 @@
     (call-with-output-file tmpfile
       (λ (port)
         (fprintf port "#lang plai/mutator\n")
-        (fprintf port "~s\n" `(allocator-setup tests/plai/gc/good-collectors/good-collector 100))
+        (fprintf port "~s\n" `(allocator-setup plai/tests/gc/good-collectors/good-collector 100))
         (for-each (λ (exp) (pretty-write exp port)) exps))
       #:exists 'truncate)
 
