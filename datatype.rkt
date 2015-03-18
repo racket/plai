@@ -1,6 +1,8 @@
 #lang racket/base
 (require (for-syntax racket/base
-                     racket/list)
+                     racket/list
+                     (except-in racket/syntax
+                                format-id))
          racket/list
          racket/contract
          racket/undefined)
@@ -50,8 +52,12 @@
 
 (define-for-syntax type-symbol (gensym))
 
+(begin-for-syntax
+  (define (plai-stx-type? lst)
+    (and (list? lst) (eq? type-symbol (first lst)))))
+
 (define-for-syntax (validate-and-remove-type-symbol stx-loc lst)
-  (if (and (list? lst) (eq? type-symbol (first lst)))
+  (if (plai-stx-type? lst)
     (rest lst)
     (plai-syntax-error 'type-case stx-loc type-case:not-a-type)))
 
@@ -67,7 +73,7 @@
     (set! SRBS null))
   (define (GRAB-SRBS)
     SRBS)
-
+  
   (define (format-id lctx fmt #:source src . v)
     (define-values
       (fmt+vs-strs final-make-srbs)
@@ -309,9 +315,10 @@
 ;;; Asserts that variant-id-stx is a variant of the type described by
 ;;; type-stx.
 (define-for-syntax ((assert-variant type-info) variant-id-stx)
-  (unless (ormap (λ (stx) (free-identifier=? variant-id-stx stx))
-                 (map first type-info))
-    (plai-syntax-error 'type-case variant-id-stx type-case:not-a-variant)))
+  (if (ormap (λ (stx) (free-identifier=? variant-id-stx stx))
+             (map first type-info))
+      (record-disappeared-uses (list variant-id-stx))
+      (plai-syntax-error 'type-case variant-id-stx type-case:not-a-variant)))
 
 ;;; Asserts that the number of fields is appropriate.
 (define-for-syntax ((assert-field-count type-info) variant-id-stx field-stx)
@@ -384,6 +391,7 @@
        #'(bind-fields-in (binding-name ...) case-variant-id rest value-id body-expr))]))
 
 (define-syntax (type-case stx)
+  (with-disappeared-uses
   (syntax-case stx (else)
     [(_ type-id test-expr [variant (field ...) case-expr] ... [else else-expr])
      ;; Ensure that everything that should be an identifier is an identifier.
@@ -392,7 +400,7 @@
           (andmap (λ (stx) (andmap identifier? (syntax->list stx)))
                   (syntax->list #'((field ...) ...))))
      (let* ([info (validate-and-remove-type-symbol
-                   #'type-id (syntax-local-value #'type-id (λ () #f)))]
+                   #'type-id (syntax-local-value/record #'type-id plai-stx-type?))]
             [type-info (first info)]
             [type? (second info)])
 
@@ -433,7 +441,7 @@
           (andmap (λ (stx) (andmap identifier? (syntax->list stx)))
                   (syntax->list #'((field ...) ...))))
      (let* ([info (validate-and-remove-type-symbol
-                   #'type-id (syntax-local-value #'type-id (λ () #f)))]
+                   #'type-id (syntax-local-value/record #'type-id plai-stx-type?))]
             [type-info (first info)]
             [type? (second info)])
 
@@ -472,7 +480,7 @@
      (begin
        (unless (identifier? #'type-id)
          (plai-syntax-error 'type-case #'type-id type-case:not-a-type))
-       (validate-and-remove-type-symbol #'type-id (syntax-local-value #'type-id (λ () #f)))
+       (validate-and-remove-type-symbol #'type-id (syntax-local-value/record #'type-id plai-stx-type?))
        (andmap validate-clause (syntax->list #'(clauses ...)))
        (plai-syntax-error 'type-case stx "Unknown error"))]
-    [_ (plai-syntax-error 'type-case stx type-case:generic)]))
+    [_ (plai-syntax-error 'type-case stx type-case:generic)])))
