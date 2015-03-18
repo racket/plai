@@ -20,7 +20,8 @@
                      "rackunit-lib"
                      "racket-doc"
                      "web-server-doc"
-                     "scribble-lib"))
+                     "scribble-lib"
+                     "drracket-tool-lib"))
 
 (define pkg-desc "Teaching languages for _Programming Languages: Application and Interpretation_")
 
