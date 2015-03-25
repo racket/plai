@@ -148,26 +148,31 @@
 (define-syntax (define-type stx)
   (syntax-parse
       stx
-    [(_ datatype:id
+    [(_ datatype:id (~and (~seq immut ...) (~optional #:immutable))
         [variant:id (field:id field/c:expr) ...]
         ...)
-
+     
+     (define mut?
+       (syntax-parse #'(immut ...)
+         [() #t]
+         [(#:immutable) #f]))
+     
      ;; Ensure we have at least one variant.
      (when (empty? (syntax->list #'(variant ...)))
        (plai-syntax-error 'define-type stx define-type:zero-variants
                           (syntax-e #'datatype)))
-
+     
      ;; Ensure variant names are unique.
      (assert-unique #'(variant ...))
      ;; Ensure each set of fields have unique names.
      (stx-map assert-unique #'((field ...) ...))
-
+     
      ;; Ensure type and variant names are unbound
      (map (assert-unbound 'define-type)
           (cons #'datatype? (syntax->list #'(variant ...))))
-
+     
      (CLEAR-SRBS!)
-
+     
      (with-syntax
          ([(variant* ...)
            (stx-map (λ (x) (datum->syntax #f (syntax->datum x)))
@@ -175,7 +180,7 @@
           [(underlying-variant ...)
            (stx-map (λ (x) (datum->syntax #f (syntax->datum x)))
                     #'(variant ...))])
-
+       
        (with-syntax
            ([((field/c-val ...) ...)
              (stx-map generate-temporaries #'((field/c ...) ...))]
@@ -191,7 +196,7 @@
              (stx-map (λ (x) (format-id stx "make-~a" x #:source x)) #'(variant ...))]
             [(make-variant* ...)
              (stx-map (λ (x) (format-id x "make-~a" x #:source x)) #'(variant* ...))])
-
+         
          (with-syntax
              ([((f:variant? ...) ...)
                (stx-map (lambda (v? fs)
@@ -210,7 +215,7 @@
                                    fields))
                         #'(variant* ...)
                         #'((field ...) ...))]
-
+              
               [((set-variant-field! ...) ...)
                (stx-map (lambda (variant fields)
                           (stx-map (λ (f) (format-id stx "set-~a-~a!" variant f #:source f))
@@ -223,11 +228,11 @@
                                    fields))
                         #'(variant* ...)
                         #'((field ...) ...))])
-
+           
            (define srbs (GRAB-SRBS))
-
+           
            (syntax-property
-            (syntax/loc stx
+            (quasisyntax/loc stx
               (begin
                 (define-syntax datatype
                   (list type-symbol
@@ -237,7 +242,7 @@
                 (define-struct variant* (field ...)
                   #:transparent
                   #:omit-define-syntaxes
-                  #:mutable
+                  #,@(if mut? #'[#:mutable] #'[])
                   #:reflection-name 'variant)
                 ...
                 (define variant?
@@ -254,15 +259,15 @@
                   ;; that would break web which doesn't use the plai
                   ;; language AND would complicate going to a
                   ;; student-language based deployment
-
+                  
                   ;; (define field/c-val field/c)
                   ;; ...
-
+                  
                   (define (the-field/c)
                     (or/c undefined?
                           field/c))
                   ...
-
+                  
                   (define make-variant
                     (lambda-memocontract (field ...)
                                          (contract ((the-field/c) ... . -> . variant?)
@@ -283,7 +288,9 @@
                              #'make-variant*
                              #'variant*?
                              (reverse (list #'variant*-field ...))
-                             (reverse (list #'set-variant*-field! ...))
+                             (if #,mut?
+                                 (reverse (list #'set-variant*-field! ...))
+                                 (stx-map (λ (_) #'#f) #'(field ...)))
                              #t))
                      (λ () #'underlying-variant)))
                   (define variant-field
@@ -293,15 +300,20 @@
                                                    'variant-field 'use
                                                    'variant-field #'field)))
                   ...
-                  (define set-variant-field!
-                    (lambda-memocontract (v nv)
-                                         (contract (f:variant? (the-field/c) . -> . void)
-                                                   set-variant*-field!
-                                                   'set-variant-field! 'use
-                                                   'set-variant-field! #'field)))
-                  ...
                   )
-                ...))
+                ...
+                #,@(if mut?
+                       #'[(define set-variant-field!
+                            (lambda-memocontract (v nv)
+                                                 (contract (f:variant? (the-field/c) . -> . void)
+                                                           set-variant*-field!
+                                                           'set-variant-field! 'use
+                                                           'set-variant-field! #'field)))
+                          ...
+                          ...
+                          ]
+                       #'[])
+                ))
             'sub-range-binders
             srbs))))]))
 
