@@ -290,7 +290,7 @@
                              (reverse (list #'variant*-field ...))
                              (if #,mut?
                                  (reverse (list #'set-variant*-field! ...))
-                                 (stx-map (λ (_) #'#f) #'(field ...)))
+                                 (stx-map (λ (_) #f) #'(field ...)))
                              #t))
                      (λ () #'underlying-variant)))
                   (define variant-field
