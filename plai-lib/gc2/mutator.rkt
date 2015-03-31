@@ -484,8 +484,9 @@
     [(_ id ...) 
      (andmap identifier? (syntax->list #'(id ...)))
      (with-syntax ([(renamed-id ...) (generate-temporaries #'(id ...))]
-                   [source (syntax-local-get-shadower
-                            (syntax-local-introduce #'scheme))])
+                   [source (datum->syntax (and (pair? (syntax-e #'(id ...)))
+                                               (car (syntax-e #'(id ...))))
+                                          'scheme)])
        #`(begin
            (require (only-in source [id renamed-id] ...))
            ;; XXX make a macro to unify this and provide/lift
