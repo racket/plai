@@ -19,6 +19,6 @@
                      "rackunit-lib"
                      "drracket-tool-lib"))
 
-(define pkg-desc "Implmentation (no documentation) for teaching languages for _Programming Languages: Application and Interpretation_")
+(define pkg-desc "Implementation (no documentation) for teaching languages for _Programming Languages: Application and Interpretation_")
 
 (define pkg-authors '(jay))
