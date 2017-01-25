@@ -50,15 +50,19 @@
       (plai-syntax-error 'define-type dup-id
                          define-type:duplicate-variant))))
 
-(define-for-syntax type-symbol (gensym))
-
 (begin-for-syntax
-  (define (plai-stx-type? lst)
-    (and (list? lst) (eq? type-symbol (first lst)))))
+  (struct a-datatype-id (sym variants pred)
+    #:property prop:procedure
+    (λ (adi stx)
+      (plai-syntax-error
+       (syntax->datum (a-datatype-id-sym adi)) stx
+       "Illegal use of type name outside type-case.")))
+  
+  (define plai-stx-type? a-datatype-id?))
 
-(define-for-syntax (validate-and-remove-type-symbol stx-loc lst)
-  (if (plai-stx-type? lst)
-    (rest lst)
+(define-for-syntax (validate-and-remove-type-symbol stx-loc v)
+  (if (plai-stx-type? v)
+    (list (a-datatype-id-variants v) (a-datatype-id-pred v))
     (plai-syntax-error 'type-case stx-loc type-case:not-a-type)))
 
 (require (for-syntax syntax/parse
@@ -235,10 +239,11 @@
             (quasisyntax/loc stx
               (begin
                 (define-syntax datatype
-                  (list type-symbol
-                        (list (list #'variant (list #'variant-field ...) #'variant?)
-                              ...)
-                        #'datatype?))
+                  (a-datatype-id
+                   #'datatype
+                   (list (list #'variant (list #'variant-field ...) #'variant?)
+                         ...)
+                   #'datatype?))
                 (define-struct variant* (field ...)
                   #:transparent
                   #:omit-define-syntaxes
