@@ -378,7 +378,8 @@
                    [(void? result) (void)]
                    [(heap-value? result) (collector:alloc-flat result)]
                    [else 
-                    (error 'id "imported primitive must return <heap-value?>, received ~a" result)]))))
+                    (error 'id (string-append "imported primitive must return <heap-value?>, "
+                                              "received ~a") result)]))))
            ...))]
     [(_ maybe-id ...) 
      (ormap (λ (v) (and (not (identifier? v)) v)) (syntax->list #'(maybe-id ...)))
