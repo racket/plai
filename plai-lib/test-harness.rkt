@@ -142,7 +142,7 @@
 (define (equal~? x y)
   (or (parameterize ([current-inspector (test-inspector)])
         (equal? x y))
-      (and (number? x) (number? y)
+      (and (real? x) (real? y)
            (or (inexact? x) (inexact? y))
            ; If one of them is inexact, we do the math.
            (< (abs (- x y)) (test-inexact-epsilon)))))

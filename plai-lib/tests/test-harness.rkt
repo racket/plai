@@ -108,6 +108,12 @@
             "(good +inf.0 +inf.0)\n"
             "(good +inf.0 +inf.0 +inf.0 \"at line ??\")\n"))
     
+    (->string (test 1.01+2i 1.0+2i))
+    =>
+    (if abridged?
+        "(bad 1.01+2.0i 1.0+2.0i)\n"
+        "(bad 1.01+2.0i 1.01+2.0i 1.0+2.0i \"at line ??\")\n")
+    
     (->string (test/pred 0 zero?))
     =>
     (if errors?
