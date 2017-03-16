@@ -70,4 +70,7 @@
 
  (type-case "foo" "bar") =error> "this must be a type defined with define-type"
  (type-case + "bar") =error> "this must be a type defined with define-type"
- (type-case #f [x () 1]) =error> "this must be a type defined with define-type")
+ (type-case #f [x () 1]) =error> "this must be a type defined with define-type"
+
+ (type-case A (mta) [mta () (define x 2) x] [else (define x 3) x]) => 2
+ (type-case A (a (mtb)) [mta () (define x 2) x] [a (b) (define x 3) x]) => 3)
