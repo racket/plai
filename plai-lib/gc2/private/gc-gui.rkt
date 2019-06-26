@@ -18,6 +18,20 @@
 (define show-arrows? #t)
 (define show-highlighted-cells? #f)
 
+;; Should use preferences:get, but doesn't work here for some reason...
+;; Symptom: always gets the default value, doesn't read prefs file.
+;; Future work: Support C-+ and C-- in the heap visualizer window.
+(define (get-proper-font)
+  (define pref
+    (get-preference
+     'plt:framework-pref:framework:standard-style-list:font-size))
+  (define size
+    (or (and (vector? pref)
+             (= (vector-length pref) 2)
+             (vector-ref pref 1))
+        12))
+  (make-object font% size 'default))
+
 (define heap-canvas%
   (class* canvas% (heap-viz<%>)
     
@@ -129,7 +143,9 @@
                   (not (equal? h (send offscreen get-height))))
           (set! offscreen (make-object bitmap% w h)))
         (let ([dc (make-object bitmap-dc% offscreen)])
+          ;; this is a fresh dc, so need to re-setup properties
           (send dc set-smoothing 'aligned)
+          (send dc set-font (get-proper-font))
           (send dc clear)
           
           (send dc set-origin 0 0)
@@ -356,7 +372,8 @@
     (super-new)
     
     (setup-min-width/height)
-    (send (get-dc) set-smoothing 'aligned)))
+    (send (get-dc) set-smoothing 'aligned)
+    (send (get-dc) set-font (get-proper-font))))
 
 (define (round-up-to-even-multiple n cols)
   (let ([%% (remainder n cols)])
