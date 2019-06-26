@@ -1,5 +1,6 @@
 #lang scheme/gui
 (require "gc-core.rkt")
+(require racket/draw)
 (provide heap-viz%)
 
 (define row-size 10)
@@ -30,7 +31,7 @@
              (= (vector-length pref) 2)
              (vector-ref pref 1))
         12))
-  (make-object font% size 'default))
+  (send the-font-list find-or-create-font size 'default 'normal 'normal))
 
 (define heap-canvas%
   (class* canvas% (heap-viz<%>)
