@@ -1,6 +1,6 @@
 #lang scheme/gui
 (require "gc-core.rkt")
-(require racket/draw)
+(require racket/draw framework)
 (provide heap-viz%)
 
 (define row-size 10)
@@ -19,18 +19,9 @@
 (define show-arrows? #t)
 (define show-highlighted-cells? #f)
 
-;; Should use preferences:get, but doesn't work here for some reason...
-;; Symptom: always gets the default value, doesn't read prefs file.
 ;; Future work: Support C-+ and C-- in the heap visualizer window.
 (define (get-proper-font)
-  (define pref
-    (get-preference
-     'plt:framework-pref:framework:standard-style-list:font-size))
-  (define size
-    (or (and (vector? pref)
-             (= (vector-length pref) 2)
-             (vector-ref pref 1))
-        12))
+  (define size (editor:get-current-preferred-font-size))
   (send the-font-list find-or-create-font size 'default 'normal 'normal))
 
 (define heap-canvas%
