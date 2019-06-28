@@ -11,6 +11,7 @@
                "srfi-lite-lib"
                "base"
                "gui-lib"
+               "draw-lib"
                "sandbox-lib"
                "web-server-lib"))
 (define build-deps '("at-exp-lib"
