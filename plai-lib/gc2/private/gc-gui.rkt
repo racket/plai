@@ -262,7 +262,7 @@
         (values (/ (+ (send arrow-point2 get-x) (send arrow-point3 get-x)) 2)
                 (/ (+ (send arrow-point2 get-y) (send arrow-point3 get-y)) 2))))
         
-    (define (cell->ltwh i)
+    (define/private (cell->ltwh i)
       (let* ([column (remainder i (vector-length column-widths))]
              [row (quotient i (vector-length column-widths))]
              [cell-x (vector-sum column-widths column)]
