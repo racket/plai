@@ -8,11 +8,11 @@
 (define heap-viz<%> (interface () update-view))
 
 (define horizontal-axis-height 0)
-(define vertical-axis-width 0)
 (define label-line-size 2)
 (define cell-horizontal-padding 6)
 (define cell-vertical-padding 4)
 (define vertical-axis-spacer 2)
+(define vertical-axis-width vertical-axis-spacer)
 
 (define-struct arrow (from to) #:transparent)
 
