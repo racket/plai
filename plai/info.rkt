@@ -15,3 +15,6 @@
 (define pkg-authors '(jay))
 
 (define implies '("plai-lib" "plai-doc"))
+
+(define license
+  '(Apache-2.0 OR MIT))

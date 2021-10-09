@@ -23,3 +23,6 @@
 (define pkg-desc "Implementation (no documentation) for teaching languages for _Programming Languages: Application and Interpretation_")
 
 (define pkg-authors '(jay))
+
+(define license
+  '(Apache-2.0 OR MIT))
