@@ -16,6 +16,7 @@
                "web-server-lib"
                "plai-lib"))
 (define build-deps '("at-exp-lib"
+                     "scheme-doc"
                      "eli-tester"
                      "pconvert-lib"
                      "rackunit-lib"
