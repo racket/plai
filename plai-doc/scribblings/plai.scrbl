@@ -205,7 +205,7 @@ The evaluation of @racket[_error-message-regexp] is considered
 @defproc[(equal~? [v1 any/c] [v2 any/c]) boolean?]{
 
 The same as @racket[equal?], except that if @racket[v1] and
-@racket[v2] are inexact real numbers, then the result
+@racket[v2] are real numbers, and if either is inexact, then the result
 is @racket[#t] if the difference between the number is
 less than @racket[(test-inexact-epsilon)].}
 
