@@ -133,7 +133,7 @@
         (when (or (not offscreen)
                   (not (equal? w (send offscreen get-width)))
                   (not (equal? h (send offscreen get-height))))
-          (set! offscreen (make-object bitmap% w h)))
+          (set! offscreen (make-screen-bitmap w h)))
         (let ([dc (make-object bitmap-dc% offscreen)])
           ;; this is a fresh dc, so need to re-setup properties
           (send dc set-smoothing 'aligned)
